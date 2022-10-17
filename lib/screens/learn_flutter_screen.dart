@@ -63,6 +63,7 @@ class _LearnFlutterPageState extends State<LearnFlutterPage> {
             },
             child: const Text('Elevated button'),
           ),
+          
           OutlinedButton(
             onPressed: () {
               debugPrint('Outlined button');
@@ -82,6 +83,7 @@ class _LearnFlutterPageState extends State<LearnFlutterPage> {
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              // mainAxisSize: MainAxisSize.max,
               children: const [
                 Icon(
                   Icons.local_fire_department,
@@ -109,8 +111,8 @@ class _LearnFlutterPageState extends State<LearnFlutterPage> {
                   isCheck = newBool;
                 });
               })),
-          // Image.network(
-          //     'https://w0.peakpx.com/wallpaper/333/363/HD-wallpaper-joker-cool-thumbnail.jpg')
+          Image.network(
+              'https://w0.peakpx.com/wallpaper/333/363/HD-wallpaper-joker-cool-thumbnail.jpg')
         ]),
       ),
     );

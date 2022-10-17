@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/home_page.dart';
-import 'package:flutter_app/profile_page.dart';
+import 'package:flutter_app/screens/bluetooth_screen.dart';
+import 'package:flutter_app/screens/home_screen.dart';
+import 'package:flutter_app/screens/camera_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,7 +30,7 @@ class RootPage extends StatefulWidget {
 class _RootPageState extends State<RootPage> {
   int currentPage = 0;
 
-  List<Widget> pages = const [HomePage(), ProfilePage()];
+  List<Widget> pages = const [HomePage(), CameraPage(), BluetoothPage()];
 
   @override
   Widget build(BuildContext context) {
@@ -38,13 +39,11 @@ class _RootPageState extends State<RootPage> {
         title: const Text('Flutka'),
       ),
       body: pages[currentPage],
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => {debugPrint('floating action')},
-        child: const Icon(Icons.home_outlined),
-      ),
       bottomNavigationBar: NavigationBar(
         destinations: const [
           NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
+          NavigationDestination(
+              icon: Icon(Icons.photo_camera_outlined), label: 'Camera'),
           NavigationDestination(
               icon: Icon(Icons.bluetooth), label: 'Bluetooth'),
         ],
