@@ -70,16 +70,14 @@ class _CameraPageState extends State<CameraPage> {
                 title: 'Pick from Camera',
                 icon: Icons.camera_alt_outlined,
                 onclick: () => getImage(ImageSource.camera)),
-            // CustomButton(
-            //     title: 'Save to gallery',
-            //     icon: Icons.save_outlined,
-            //     onclick: () => saveFilePermanently(image!.path))
+          
           ],
         )),
       ),
     );
   }
 }
+
 
 Widget customButton(
     {required String title,

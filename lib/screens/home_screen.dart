@@ -1,15 +1,26 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-
+import 'package:provider/provider.dart';
+import 'package:flutter_app/providers/todo_provider.dart';
 import '../widgets/todo_item.dart';
 import 'learn_flutter_screen.dart';
 
 class Todo {
   Todo({required this.id, required this.name, required this.checked});
+
   final int id;
   final String name;
   bool checked;
+
+  factory Todo.fromJson(Map<String, dynamic> json) {
+    return Todo(id: json['id'], name: json['text'], checked: false);
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'text': name,
+      'id': id,
+    };
+  }
 }
 
 class HomePage extends StatefulWidget {
@@ -20,9 +31,15 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Todo> todos = <Todo>[];
-
   final TextEditingController textFieldController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    final dataProvider = Provider.of<TodoProvider>(context, listen: false);
+    dataProvider.getMyData();
+  }
 
   Future<void> displayDialog() async {
     return showDialog<void>(
@@ -39,7 +56,10 @@ class _HomePageState extends State<HomePage> {
               TextButton(
                   onPressed: (() {
                     Navigator.of(context).pop();
-                    addTodoItem(textFieldController.text);
+                    context
+                        .read<TodoProvider>()
+                        .addTodoItem(textFieldController.text);
+                    textFieldController.clear();
                   }),
                   child: const Text("Add"))
             ],
@@ -47,44 +67,99 @@ class _HomePageState extends State<HomePage> {
         });
   }
 
-  void addTodoItem(String name) {
-    var rng = Random();
-
-    int id = rng.nextInt(1000);
-    // debugPrint('${id}');
-    setState(() {
-      todos.add(Todo(id: id, name: name, checked: false));
-    });
-    textFieldController.clear();
+  Widget customButton(
+      {required String title,
+      required IconData icon,
+      required VoidCallback onclick}) {
+    return SizedBox(
+      width: 300,
+      child: ElevatedButton(
+          onPressed: onclick,
+          child: Row(
+            children: [Icon(icon), const SizedBox(width: 20), Text(title)],
+          )),
+    );
   }
-
-  void handleTodoChanged(Todo todo) {
-    setState(() {
-      todo.checked = !todo.checked;
-    });
-  }
-
-  final leftEditIcon = Container(
-    color: Colors.green,
-    alignment: Alignment.centerLeft,
-    child: const Icon(Icons.edit),
-  );
-  final rightDeleteIcon = Container(
-    color: Colors.red,
-    alignment: Alignment.centerRight,
-    child: const Icon(Icons.delete),
-  );
 
   @override
   Widget build(BuildContext context) {
+    final dataProvider = Provider.of<TodoProvider>(context);
+    List<Todo> todos = dataProvider.todos;
     return Scaffold(
-      body: Column(
-        children: [
-          Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: listView(context)),
-        ],
+      body: SingleChildScrollView(
+        child: Center(
+            child: Column(
+          children: <Widget>[
+            SizedBox(
+              height: 500,
+              child: ListView.separated(
+                itemCount: todos.length,
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                itemBuilder: (context, index) {
+                  final data = todos[index];
+                  return Dismissible(
+                      key: ObjectKey(todos[index]),
+                      background: leftEditIcon,
+                      secondaryBackground: rightDeleteIcon,
+                      confirmDismiss: (DismissDirection direction) async {
+                        if (direction == DismissDirection.startToEnd) {
+                          print("Go to edit page ");
+                          return false;
+                        } else {
+                          return Future.value(
+                              direction == DismissDirection.endToStart);
+                        }
+                      },
+                      onDismissed: (DismissDirection direction) async {
+                        if (direction == DismissDirection.endToStart) {
+                          print("delete");
+
+                          context.read<TodoProvider>().deleteItem(data);
+
+                          ScaffoldMessenger.of(context)
+                            ..removeCurrentSnackBar()
+                            ..showSnackBar(SnackBar(
+                              content: Text('Deleted todo with id: ${data.id}'),
+                              action: SnackBarAction(
+                                label: "UNDO",
+                                onPressed: () {
+                                  context
+                                      .read<TodoProvider>()
+                                      .insertTodo(index, data);
+                                },
+                              ),
+                            ));
+                        }
+                      },
+                      child: TodoItem(
+                        todo: data,
+                        onTodoChanged:
+                            context.read<TodoProvider>().handleTodoChanged,
+                      ));
+                },
+                separatorBuilder: (context, index) {
+                  return const Divider(color: Colors.black);
+                },
+              ),
+            ),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) {
+                        return const LearnFlutterPage();
+                      },
+                    ),
+                  );
+                },
+                child: const Text('Learn me'),
+              ),
+            ),
+          ],
+        )),
       ),
       floatingActionButton: FloatingActionButton(
           onPressed: () => displayDialog(),
@@ -94,72 +169,17 @@ class _HomePageState extends State<HomePage> {
   }
 
   List<Widget> listView(BuildContext context) {
-    return [
-      ListView.separated(
-        itemCount: todos.length,
-        scrollDirection: Axis.vertical,
-        shrinkWrap: true,
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        itemBuilder: (context, index) {
-          final data = todos[index];
-          return Dismissible(
-              key: ObjectKey(todos[index]),
-              background: leftEditIcon,
-              secondaryBackground: rightDeleteIcon,
-              confirmDismiss: (DismissDirection direction) async {
-                if (direction == DismissDirection.startToEnd) {
-                  print("Go to edit page ");
-                  return false;
-                } else {
-                  return Future.value(direction == DismissDirection.endToStart);
-                }
-              },
-              onDismissed: (DismissDirection direction) async {
-                if (direction == DismissDirection.endToStart) {
-                  print("delete");
-
-                  setState(() {
-                    todos.removeWhere((todo) => todo.id == data.id);
-
-                    ScaffoldMessenger.of(context)
-                      ..removeCurrentSnackBar()
-                      ..showSnackBar(SnackBar(
-                        content: Text('Deleted todo with id: ${data.id}'),
-                        action: SnackBarAction(
-                          label: "UNDO",
-                          onPressed: () {
-                            setState(() {
-                              todos.insert(index, data);
-                            });
-                          },
-                        ),
-                      ));
-                  });
-                }
-              },
-              child: TodoItem(
-                todo: data,
-                onTodoChanged: handleTodoChanged,
-              ));
-        },
-        separatorBuilder: (context, index) {
-          return const Divider(color: Colors.black);
-        },
-      ),
-      Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return const LearnFlutterPage();
-                },
-              ),
-            );
-          },
-          child: const Text('Learn me'),
-        ),
-      ),
-    ];
+    return [];
   }
 }
+
+final leftEditIcon = Container(
+  color: Colors.green,
+  alignment: Alignment.centerLeft,
+  child: const Icon(Icons.edit),
+);
+final rightDeleteIcon = Container(
+  color: Colors.red,
+  alignment: Alignment.centerRight,
+  child: const Icon(Icons.delete),
+);

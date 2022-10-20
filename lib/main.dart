@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/providers/bluetooth_provider.dart';
+import 'package:flutter_app/providers/todo_provider.dart';
 import 'package:flutter_app/screens/bluetooth_screen.dart';
 import 'package:flutter_app/screens/home_screen.dart';
 import 'package:flutter_app/screens/camera_screen.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (_) => TodoProvider()),
+    ChangeNotifierProvider(create: (_) => BluetoothProvider())
+  ], child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -14,7 +20,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.red),
+      theme: ThemeData(primarySwatch: Colors.indigo),
       home: const RootPage(),
     );
   }
