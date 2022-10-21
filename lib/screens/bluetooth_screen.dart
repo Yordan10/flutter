@@ -13,7 +13,9 @@ class BluetoothPage extends StatefulWidget {
 class _BluetoothPageState extends State<BluetoothPage> {
   @override
   Widget build(BuildContext context) {
+    final dataProvider = Provider.of<BluetoothProvider>(context);
     bool scanStarted = context.watch<BluetoothProvider>().scanStarted;
+
     List<DiscoveredDevice> allDevices =
         context.watch<BluetoothProvider>().allDevices;
     bool isConnected = context.watch<BluetoothProvider>().isConnected;
@@ -28,7 +30,7 @@ class _BluetoothPageState extends State<BluetoothPage> {
             padding: const EdgeInsets.all(10),
             children: allDevices.map((device) {
               return Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                // crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(
                     flex: 5,
@@ -40,21 +42,68 @@ class _BluetoothPageState extends State<BluetoothPage> {
                     ),
                   ),
                   Expanded(
-                    flex: 1,
+                    flex: 2,
                     child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           primary: Colors.grey, // background
                           onPrimary: Colors.white, // foreground
                         ),
-                        onPressed: (() => context
-                            .read<BluetoothProvider>()
-                            .connectToDevice(device)),
+                        onPressed: (() {
+                          context
+                              .read<BluetoothProvider>()
+                              .connectToDevice(device);
+                        }),
                         child: const Icon(Icons.bluetooth)),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.grey, // background
+                          onPrimary: Colors.white, // foreground
+                        ),
+                        onPressed: (() {
+                          dataProvider.disconnect();
+                        }),
+                        child: const Icon(Icons.remove_circle)),
                   ),
                 ],
               );
             }).toList(),
           ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Column(
+                children: [
+                  dataProvider.bluePlus == true
+                      ? const Text(
+                          "Blue plus is active",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                              fontSize: 25),
+                        )
+                      : const Text(""),
+                  Text("Blue team score: ${dataProvider.scoreBlue}"),
+                ],
+              ),
+              Column(
+                children: [
+                  dataProvider.orangePlus == true
+                      ? const Text(
+                          "Orange plus is active",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange,
+                              fontSize: 25),
+                        )
+                      : const Text(""),
+                  Text("Orange team score: ${dataProvider.scoreOrange}")
+                ],
+              )
+            ],
+          )
         ],
       ),
       persistentFooterButtons: [
@@ -62,7 +111,9 @@ class _BluetoothPageState extends State<BluetoothPage> {
             ? ElevatedButton(
                 style: ElevatedButton.styleFrom(
                     primary: Colors.grey, onPrimary: Colors.white),
-                onPressed: (() {}),
+                onPressed: (() {
+                  context.read<BluetoothProvider>().startScan();
+                }),
                 child: const Icon(Icons.search))
             : ElevatedButton(
                 style: ElevatedButton.styleFrom(

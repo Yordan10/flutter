@@ -6,23 +6,41 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:location/location.dart' as loc;
 
 class BluetoothProvider extends ChangeNotifier {
+  //initializing variables
   bool _scanStarted = false;
   bool _isConnected = false;
   late List<DiscoveredDevice> _allDevices = [];
   late DiscoveredDevice _connectedDevice;
+
   late StreamSubscription<ConnectionStateUpdate> _connection;
+
   late StreamSubscription<DiscoveredDevice> _scanStream;
+
   late QualifiedCharacteristic _rxCharacteristic;
+  bool _blueMinus = false;
+  bool _bluePlus = false;
+  bool _orangeMinus = false;
+  bool _orangePlus = false;
+  int _scoreOrange = 0;
+  int _scoreBlue = 0;
 
   final flutterReactiveBle = FlutterReactiveBle();
+
+//getters
 
   bool get scanStarted => _scanStarted;
   bool get isConnected => _isConnected;
   List<DiscoveredDevice> get allDevices => _allDevices;
   DiscoveredDevice get connectedDevice => _connectedDevice;
-  StreamSubscription<ConnectionStateUpdate> get connection => _connection;
   StreamSubscription<DiscoveredDevice> get scanStream => _scanStream;
+
   QualifiedCharacteristic get rxCharacteristic => _rxCharacteristic;
+  bool get blueMinus => _blueMinus;
+  bool get bluePlus => _bluePlus;
+  bool get orangeMinus => _orangeMinus;
+  bool get orangePlus => _orangePlus;
+  int get scoreOrange => _scoreOrange;
+  int get scoreBlue => _scoreBlue;
 
   Uuid getServiceUuid() {
     if (Platform.isIOS) return Uuid.parse('FFE0');
@@ -65,7 +83,7 @@ class BluetoothProvider extends ChangeNotifier {
       permGranted = true;
     }
     debugPrint('$permGranted');
-  
+
     if (permGranted) {
       _scanStream = flutterReactiveBle
           .scanForDevices(withServices: [getServiceUuid()]).listen((device) {
@@ -85,19 +103,33 @@ class BluetoothProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void disconnect() async {
+    try {
+      await _connection.cancel();
+      _isConnected = false;
+
+      _allDevices = [];
+
+      notifyListeners();
+    } on Exception catch (e, _) {
+      print("Error disconnecting from a device");
+    }
+  }
+
   void connectToDevice(DiscoveredDevice device) {
     _scanStream.cancel();
-    
-    Stream<ConnectionStateUpdate> currentConnectionStatus =
-        flutterReactiveBle.connectToDevice(
-            id: device.id, connectionTimeout: const Duration(seconds: 2));
+    _isConnected = true;
+    print('vlizaaaaaaaaam $_isConnected');
 
-    currentConnectionStatus.listen((event) async {
+    _connection = flutterReactiveBle
+        .connectToDevice(
+            id: device.id, connectionTimeout: const Duration(seconds: 2))
+        .listen((event) async {
       switch (event.connectionState) {
         case DeviceConnectionState.connected:
           {
+            print(event.connectionState);
             _connectedDevice = device;
-            _isConnected = true;
 
             _rxCharacteristic = QualifiedCharacteristic(
                 characteristicId: getCharacteristicUuid(),
@@ -108,15 +140,19 @@ class BluetoothProvider extends ChangeNotifier {
             flutterReactiveBle
                 .subscribeToCharacteristic(rxCharacteristic)
                 .listen((data) {
-              // var sum = data[0] + data[1] + data[2];
+              var sum = data[0] + data[1] + data[2];
               // Uint8List data = Uint8List.fromList(event);
-              print('Data received:$data');
+              print('Data received:$sum');
+              onDataReceived(data);
             });
 
             break;
           }
         case DeviceConnectionState.disconnected:
           {
+            _connection.cancel();
+            _isConnected = false;
+
             break;
           }
         default:
@@ -125,12 +161,71 @@ class BluetoothProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void keepAlive() {
-    Timer.periodic(const Duration(seconds: 5), (timer) => handleKeepAlive());
+  void onDataReceived(data) {
+    var sum = data[0] + data[1] + data[2];
+    switch (sum) {
+      case 76:
+        {
+          resetBooleans();
+          _orangePlus = true;
+        }
+        break;
+      case 77:
+        {
+          resetBooleans();
+          _bluePlus = true;
+        }
+        break;
+      case 78:
+        {
+          resetBooleans();
+          _orangeMinus = true;
+        }
+        break;
+      case 79:
+        {
+          resetBooleans();
+          _blueMinus = true;
+        }
+        break;
+      case 116:
+        {
+          resetBooleans();
+          _scoreOrange += 1;
+        }
+        break;
+      case 117:
+        {
+          resetBooleans();
+          _scoreBlue += 1;
+        }
+        break;
+    }
+
     notifyListeners();
   }
 
+  void keepAlive() {
+    print('$isConnected');
+    if (_isConnected == true) {
+      Timer.periodic(const Duration(seconds: 5), (timer) {
+        if (_isConnected) {
+          handleKeepAlive();
+        }
+      });
+      notifyListeners();
+    }
+  }
+
+  void resetBooleans() {
+    _blueMinus = false;
+    _bluePlus = false;
+    _orangeMinus = false;
+    _orangePlus = false;
+  }
+
   void handleKeepAlive() {
+    print(isConnected);
     print('Keep alive activated');
     var data = List<int>.generate(6, (index) => index + 1);
     data[0] = 32;

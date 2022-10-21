@@ -63,7 +63,7 @@ class _CameraPageState extends State<CameraPage> {
                 : Image.network(
                     'https://s2.coinmarketcap.com/static/img/coins/200x200/5225.png'),
             customButton(
-                title: 'Pick form gallery',
+                title: 'Pick from gallery',
                 icon: Icons.image_outlined,
                 onclick: () => getImage(ImageSource.gallery)),
             customButton(
