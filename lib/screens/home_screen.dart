@@ -91,7 +91,7 @@ class _HomePageState extends State<HomePage> {
             child: Column(
           children: <Widget>[
             SizedBox(
-              height: 500,
+              height: 300,
               child: ListView.separated(
                 itemCount: todos.length,
                 scrollDirection: Axis.vertical,
