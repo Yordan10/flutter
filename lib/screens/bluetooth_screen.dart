@@ -75,33 +75,38 @@ class _BluetoothPageState extends State<BluetoothPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Column(
-                children: [
-                  dataProvider.bluePlus == true
-                      ? const Text(
-                          "Blue plus is active",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue,
-                              fontSize: 25),
-                        )
-                      : const Text(""),
-                  Text("Blue team score: ${dataProvider.scoreBlue}"),
-                ],
+              Expanded(
+                child: Column(
+                  
+                  children: [
+                    dataProvider.bluePlus == true
+                        ? const Text(
+                            "Blue plus is active",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                                fontSize: 25),
+                          )
+                        : const Text(""),
+                    Text("Blue team score: ${dataProvider.scoreBlue}"),
+                  ],
+                ),
               ),
-              Column(
-                children: [
-                  dataProvider.orangePlus == true
-                      ? const Text(
-                          "Orange plus is active",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.orange,
-                              fontSize: 25),
-                        )
-                      : const Text(""),
-                  Text("Orange team score: ${dataProvider.scoreOrange}")
-                ],
+              Expanded(
+                child: Column(
+                  children: [
+                    dataProvider.orangePlus == true
+                        ? const Text(
+                            "Orange plus is active",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.orange,
+                                fontSize: 25),
+                          )
+                        : const Text(""),
+                    Text("Orange team score: ${dataProvider.scoreOrange}")
+                  ],
+                ),
               )
             ],
           )
