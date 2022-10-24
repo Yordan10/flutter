@@ -33,7 +33,7 @@ class _LearnFlutterPageState extends State<LearnFlutterPage> {
       body: SingleChildScrollView(
         child: Column(children: [
           Image.asset(
-            'images/sashka.jpg',
+            'images/smartgoals.png',
             height: 350,
             width: double.infinity,
           ),
@@ -50,7 +50,7 @@ class _LearnFlutterPageState extends State<LearnFlutterPage> {
             width: double.infinity,
             child: const Center(
               child: Text(
-                'Tova e sashko i obi4a da sere',
+                'The best football gadget you can buy',
                 style: TextStyle(color: Colors.white),
               ),
             ),
@@ -63,7 +63,6 @@ class _LearnFlutterPageState extends State<LearnFlutterPage> {
             },
             child: const Text('Elevated button'),
           ),
-          
           OutlinedButton(
             onPressed: () {
               debugPrint('Outlined button');

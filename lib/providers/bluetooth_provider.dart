@@ -21,7 +21,7 @@ class BluetoothProvider extends ChangeNotifier {
   bool _bluePlus = false;
   bool _orangeMinus = false;
   bool _orangePlus = false;
-  int _scoreOrange = 0;
+  int _scoreOrange = 0; 
   int _scoreBlue = 0;
 
   final flutterReactiveBle = FlutterReactiveBle();
@@ -119,7 +119,6 @@ class BluetoothProvider extends ChangeNotifier {
   void connectToDevice(DiscoveredDevice device) {
     _scanStream.cancel();
     _isConnected = true;
-    print('vlizaaaaaaaaam $_isConnected');
 
     _connection = flutterReactiveBle
         .connectToDevice(
@@ -225,7 +224,6 @@ class BluetoothProvider extends ChangeNotifier {
   }
 
   void handleKeepAlive() {
-    print(isConnected);
     print('Keep alive activated');
     var data = List<int>.generate(6, (index) => index + 1);
     data[0] = 32;

@@ -33,40 +33,41 @@ class _BluetoothPageState extends State<BluetoothPage> {
                 // crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(
-                    flex: 5,
-                    child: Container(
-                      margin: const EdgeInsets.all(5),
-                      padding: const EdgeInsets.all(15),
-                      color: isConnected ? Colors.green[300] : Colors.red[600],
-                      child: Text('${device.name} with id:${device.id}'),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          primary: Colors.grey, // background
-                          onPrimary: Colors.white, // foreground
+                      flex: 5,
+                      child: Container(
+                        margin: const EdgeInsets.all(5),
+                        padding: const EdgeInsets.all(15),
+                        color:
+                            isConnected ? Colors.green[300] : Colors.red[600],
+                        child: Text('${device.name} with id:${device.id}'),
+                      )),
+                  isConnected == false
+                      ? Expanded(
+                          flex: 2,
+                          child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.grey, // background
+                                onPrimary: Colors.white, // foreground
+                              ),
+                              onPressed: (() {
+                                context
+                                    .read<BluetoothProvider>()
+                                    .connectToDevice(device);
+                              }),
+                              child: const Icon(Icons.bluetooth)),
+                        )
+                      : Expanded(
+                          flex: 2,
+                          child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.grey, // background
+                                onPrimary: Colors.white, // foreground
+                              ),
+                              onPressed: (() {
+                                dataProvider.disconnect();
+                              }),
+                              child: const Icon(Icons.cancel)),
                         ),
-                        onPressed: (() {
-                          context
-                              .read<BluetoothProvider>()
-                              .connectToDevice(device);
-                        }),
-                        child: const Icon(Icons.bluetooth)),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          primary: Colors.grey, // background
-                          onPrimary: Colors.white, // foreground
-                        ),
-                        onPressed: (() {
-                          dataProvider.disconnect();
-                        }),
-                        child: const Icon(Icons.remove_circle)),
-                  ),
                 ],
               );
             }).toList(),

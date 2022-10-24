@@ -26,25 +26,10 @@ class _CameraPageState extends State<CameraPage> {
       setState(() {
         this.image = imageTemporary;
       });
-      // await saveFilePermanently(imageTemporary);
     } on PlatformException catch (e) {
       debugPrint(' Hvanah ei toq problem dokato vzimam snimka + $e');
     }
   }
-
-  // Future saveFilePermanently(File image) async {
-  //   if (this.image == null) {
-  //     return;
-  //   } else {
-  //     final image = this.image;
-  //     final directory = await getApplicationDocumentsDirectory();
-  //     final fileName = basename(image!.path);
-  //     // final image = File('${directory.path}/$fileName');
-  //     print('vlizam ${this.image}');
-
-  //     await image.copy('${}/$fileName');
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -60,8 +45,7 @@ class _CameraPageState extends State<CameraPage> {
                     height: 350,
                     fit: BoxFit.contain,
                   )
-                : Image.network(
-                    'https://s2.coinmarketcap.com/static/img/coins/200x200/5225.png'),
+                : Image.asset('images/barcelona.jpg'),
             customButton(
                 title: 'Pick from gallery',
                 icon: Icons.image_outlined,
@@ -70,14 +54,12 @@ class _CameraPageState extends State<CameraPage> {
                 title: 'Pick from Camera',
                 icon: Icons.camera_alt_outlined,
                 onclick: () => getImage(ImageSource.camera)),
-          
           ],
         )),
       ),
     );
   }
 }
-
 
 Widget customButton(
     {required String title,

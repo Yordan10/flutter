@@ -15,7 +15,7 @@ class Todo {
     return Todo(id: json['id'], name: json['text'], checked: false);
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {
       'text': name,
       'id': id,

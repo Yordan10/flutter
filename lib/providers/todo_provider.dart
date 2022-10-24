@@ -20,7 +20,7 @@ class TodoProvider extends ChangeNotifier {
   }
 
   Future<List<Todo>> getTodos() async {
-    print('entered gettodos');
+    print('entered get todos');
     List<Todo> newTodos = [];
     final response = await http.get(Uri.parse(api));
 
@@ -40,7 +40,7 @@ class TodoProvider extends ChangeNotifier {
     var rng = Random();
     int id = rng.nextInt(1000);
     Todo newTodo = Todo(id: id, name: name, checked: false);
-    var body = json.encode(newTodo.toMap());
+    var body = json.encode(newTodo.toJson());
 
     final response = await http.post(Uri.parse(api),
         headers: {"Content-Type": "application/json"}, body: body);
