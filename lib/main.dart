@@ -42,6 +42,7 @@ class _RootPageState extends State<RootPage> {
   @override
   Widget build(BuildContext context) {
     double displayWidth = MediaQuery.of(context).size.width;
+    const Duration duration = Duration(milliseconds: 400);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Flutka'),
@@ -75,14 +76,14 @@ class _RootPageState extends State<RootPage> {
                   highlightColor: Colors.transparent,
                   child: Stack(children: [
                     AnimatedContainer(
-                      duration: const Duration(milliseconds: 400),
+                      duration: duration,
                       curve: Curves.fastLinearToSlowEaseIn,
                       width: index == currentPage
                           ? displayWidth * .37
                           : displayWidth * .25,
                       alignment: Alignment.center,
                       child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 400),
+                        duration: duration,
                         curve: Curves.fastLinearToSlowEaseIn,
                         height: index == currentPage ? displayWidth * .12 : 0,
                         width: index == currentPage ? displayWidth * .34 : 0,
@@ -94,7 +95,7 @@ class _RootPageState extends State<RootPage> {
                       ),
                     ),
                     AnimatedContainer(
-                      duration: const Duration(milliseconds: 400),
+                      duration: duration,
                       curve: Curves.fastLinearToSlowEaseIn,
                       width: index == currentPage
                           ? displayWidth * .37
@@ -105,7 +106,7 @@ class _RootPageState extends State<RootPage> {
                           Row(
                             children: [
                               AnimatedContainer(
-                                duration: const Duration(milliseconds: 400),
+                                duration: duration,
                                 curve: Curves.fastLinearToSlowEaseIn,
                                 width: index == currentPage
                                     ? displayWidth * .15
@@ -113,7 +114,7 @@ class _RootPageState extends State<RootPage> {
                               ),
                               AnimatedOpacity(
                                 opacity: index == currentPage ? 1 : 0,
-                                duration: const Duration(milliseconds: 400),
+                                duration: duration,
                                 curve: Curves.fastLinearToSlowEaseIn,
                                 child: Text(index == currentPage
                                     ? destinations[index].label
@@ -124,7 +125,7 @@ class _RootPageState extends State<RootPage> {
                           Row(
                             children: [
                               AnimatedContainer(
-                                  duration: const Duration(milliseconds: 400),
+                                  duration: duration,
                                   curve: Curves.fastLinearToSlowEaseIn,
                                   width: index == currentPage
                                       ? displayWidth * .05
