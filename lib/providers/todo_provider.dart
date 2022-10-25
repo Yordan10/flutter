@@ -12,11 +12,16 @@ class TodoProvider extends ChangeNotifier {
 
   List<Todo> get todos => _todos;
 
-  getMyData() async {
+  Future<void> getMyData() async {
     isLoading = true;
-    _todos = await getTodos();
-    isLoading = false;
-    notifyListeners();
+    try {
+      _todos = await getTodos();
+      isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      print(e);
+      
+    }
   }
 
   Future<List<Todo>> getTodos() async {

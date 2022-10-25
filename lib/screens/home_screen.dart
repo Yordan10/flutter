@@ -86,87 +86,100 @@ class _HomePageState extends State<HomePage> {
     final dataProvider = Provider.of<TodoProvider>(context);
     List<Todo> todos = dataProvider.todos;
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverFillRemaining(
-              hasScrollBody: true,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Flexible(
-                    // flex: 3,
-                    fit: FlexFit.loose,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          context.read<TodoProvider>().getMyData();
+        },
+        child: CustomScrollView(
+          slivers: [
+            SliverFillRemaining(
+                hasScrollBody: true,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      // flex: 3,
+                      fit: FlexFit.loose,
+                      child: RefreshIndicator(
+                        onRefresh: () async {
+                          context.read<TodoProvider>().getMyData();
+                        },
+                        child: ListView.separated(
+                          itemCount: todos.length,
+                          shrinkWrap: true,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          itemBuilder: (context, index) {
+                            final data = todos[index];
+                            return Dismissible(
+                                key: ObjectKey(todos[index]),
+                                background: leftEditIcon,
+                                secondaryBackground: rightDeleteIcon,
+                                confirmDismiss:
+                                    (DismissDirection direction) async {
+                                  if (direction ==
+                                      DismissDirection.startToEnd) {
+                                    print("Go to edit page ");
+                                    return false;
+                                  } else {
+                                    return Future.value(direction ==
+                                        DismissDirection.endToStart);
+                                  }
+                                },
+                                onDismissed:
+                                    (DismissDirection direction) async {
+                                  if (direction ==
+                                      DismissDirection.endToStart) {
+                                    print("delete");
 
-                    child: ListView.separated(
-                      itemCount: todos.length,
-                      shrinkWrap: true,
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      itemBuilder: (context, index) {
-                        final data = todos[index];
-                        return Dismissible(
-                            key: ObjectKey(todos[index]),
-                            background: leftEditIcon,
-                            secondaryBackground: rightDeleteIcon,
-                            confirmDismiss: (DismissDirection direction) async {
-                              if (direction == DismissDirection.startToEnd) {
-                                print("Go to edit page ");
-                                return false;
-                              } else {
-                                return Future.value(
-                                    direction == DismissDirection.endToStart);
-                              }
-                            },
-                            onDismissed: (DismissDirection direction) async {
-                              if (direction == DismissDirection.endToStart) {
-                                print("delete");
-
-                                ScaffoldMessenger.of(context)
-                                  ..removeCurrentSnackBar()
-                                  ..showSnackBar(SnackBar(
-                                    content: Text(
-                                        'Deleted todo with id: ${data.id}'),
-                                    action: SnackBarAction(
-                                      label: "UNDO",
-                                      onPressed: () {
-                                        context
-                                            .read<TodoProvider>()
-                                            .insertTodo(index, data);
-                                      },
-                                    ),
-                                  ));
-                              }
-                              context.read<TodoProvider>().deleteItem(data);
-                            },
-                            child: TodoItem(
-                              todo: data,
-                              onTodoChanged: context
-                                  .read<TodoProvider>()
-                                  .handleTodoChanged,
-                            ));
-                      },
-                      separatorBuilder: (context, index) {
-                        return const Divider(color: Colors.black);
-                      },
+                                    ScaffoldMessenger.of(context)
+                                      ..removeCurrentSnackBar()
+                                      ..showSnackBar(SnackBar(
+                                        content: Text(
+                                            'Deleted todo with id: ${data.id}'),
+                                        action: SnackBarAction(
+                                          label: "UNDO",
+                                          onPressed: () {
+                                            context
+                                                .read<TodoProvider>()
+                                                .insertTodo(index, data);
+                                          },
+                                        ),
+                                      ));
+                                  }
+                                  context.read<TodoProvider>().deleteItem(data);
+                                },
+                                child: TodoItem(
+                                  todo: data,
+                                  onTodoChanged: context
+                                      .read<TodoProvider>()
+                                      .handleTodoChanged,
+                                ));
+                          },
+                          separatorBuilder: (context, index) {
+                            return const Divider(color: Colors.black);
+                          },
+                        ),
+                      ),
                     ),
-                  ),
-                  Center(
-                    // flex: 1,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (BuildContext context) {
-                              return const LearnFlutterPage();
-                            },
-                          ),
-                        );
-                      },
-                      child: const Text('Learn me'),
+                    Center(
+                      // flex: 1,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (BuildContext context) {
+                                return const LearnFlutterPage();
+                              },
+                            ),
+                          );
+                        },
+                        child: const Text('Learn me'),
+                      ),
                     ),
-                  ),
-                ],
-              )),
-        ],
+                  ],
+                )),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
           onPressed: () => displayDialog(),
