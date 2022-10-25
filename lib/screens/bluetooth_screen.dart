@@ -19,7 +19,6 @@ class _BluetoothPageState extends State<BluetoothPage> {
     List<DiscoveredDevice> allDevices =
         context.watch<BluetoothProvider>().allDevices;
     bool isConnected = context.watch<BluetoothProvider>().isConnected;
-    // void startScan = context.read<BluetoothProvider>().startScan();
 
     return Scaffold(
       body: Column(
@@ -47,7 +46,6 @@ class _BluetoothPageState extends State<BluetoothPage> {
                           child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 primary: Colors.grey, // background
-                                onPrimary: Colors.white, // foreground
                               ),
                               onPressed: (() {
                                 context
@@ -60,13 +58,13 @@ class _BluetoothPageState extends State<BluetoothPage> {
                           flex: 2,
                           child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                primary: Colors.grey, // background
-                                onPrimary: Colors.white, // foreground
+                                backgroundColor: Colors.grey, // background
+                                // onPrimary: Colors.white, // foreground
                               ),
                               onPressed: (() {
                                 dataProvider.disconnect();
                               }),
-                              child: const Icon(Icons.cancel)),
+                              child: const Icon(Icons.cancel,color: Colors.red,)),
                         ),
                 ],
               );

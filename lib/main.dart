@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_app/providers/bluetooth_provider.dart';
 import 'package:flutter_app/providers/todo_provider.dart';
 import 'package:flutter_app/screens/bluetooth_screen.dart';
@@ -40,26 +41,110 @@ class _RootPageState extends State<RootPage> {
 
   @override
   Widget build(BuildContext context) {
+    double displayWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Flutka'),
       ),
       body: pages[currentPage],
-      bottomNavigationBar: NavigationBar(
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
-          NavigationDestination(
-              icon: Icon(Icons.photo_camera_outlined), label: 'Camera'),
-          NavigationDestination(
-              icon: Icon(Icons.bluetooth), label: 'Bluetooth'),
-        ],
-        onDestinationSelected: (int index) {
-          setState(() {
-            currentPage = index;
-          });
-        },
-        selectedIndex: currentPage,
+      bottomNavigationBar: Container(
+        margin: EdgeInsets.all(displayWidth * .05),
+        height: displayWidth * .155,
+        decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(.1),
+                blurRadius: 30,
+                offset: const Offset(0, 10),
+              )
+            ],
+            borderRadius: BorderRadius.circular(50)),
+        child: ListView.builder(
+            itemCount: 3,
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.symmetric(horizontal: displayWidth * .02),
+            itemBuilder: (context, index) => InkWell(
+                  onTap: (() {
+                    setState(() {
+                      currentPage = index;
+                      HapticFeedback.lightImpact();
+                    });
+                  }),
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  child: Stack(children: [
+                    AnimatedContainer(
+                      duration: const Duration(seconds: 1),
+                      curve: Curves.fastLinearToSlowEaseIn,
+                      width: index == currentPage
+                          ? displayWidth * .39
+                          : displayWidth * .23,
+                      alignment: Alignment.center,
+                      child: AnimatedContainer(
+                        duration: const Duration(seconds: 1),
+                        curve: Curves.fastLinearToSlowEaseIn,
+                        height: index == currentPage ? displayWidth * .12 : 0,
+                        width: index == currentPage ? displayWidth * .34 : 0,
+                        decoration: BoxDecoration(
+                            color: index == currentPage
+                                ? Colors.blueAccent.withOpacity(.3)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(50)),
+                      ),
+                    ),
+                    AnimatedContainer(
+                      duration: const Duration(seconds: 1),
+                      curve: Curves.fastLinearToSlowEaseIn,
+                      width: index == currentPage
+                          ? displayWidth * .37
+                          : displayWidth * .24,
+                      alignment: Alignment.center,
+                      child: Stack(
+                        children: [
+                          Row(
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(seconds: 1),
+                                curve: Curves.fastLinearToSlowEaseIn,
+                                width: index == currentPage
+                                    ? displayWidth * .15
+                                    : 0,
+                              ),
+                              AnimatedOpacity(
+                                opacity: index == currentPage ? 1 : 0,
+                                duration: const Duration(seconds: 1),
+                                curve: Curves.fastLinearToSlowEaseIn,
+                                child: Text(index == currentPage
+                                    ? listOfStrings[index]
+                                    : ''),
+                              )
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              AnimatedContainer(
+                                  duration: const Duration(seconds: 1),
+                                  curve: Curves.fastLinearToSlowEaseIn,
+                                  width: index == currentPage
+                                      ? displayWidth * .05
+                                      : 20),
+                              Icon(listOfIcons[index],
+                                  size: displayWidth * .076,
+                                  color: index == currentPage
+                                      ? Colors.blueAccent
+                                      : Colors.black26)
+                            ],
+                          )
+                        ],
+                      ),
+                    )
+                  ]),
+                )),
       ),
     );
   }
+
+  List<String> listOfStrings = ['Home', 'Camera', 'Bluetooth'];
+  List<IconData> listOfIcons = [Icons.home, Icons.camera_alt, Icons.bluetooth];
 }
