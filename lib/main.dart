@@ -61,7 +61,7 @@ class _RootPageState extends State<RootPage> {
             ],
             borderRadius: BorderRadius.circular(50)),
         child: ListView.builder(
-            itemCount: 3,
+            itemCount: destinations.length,
             scrollDirection: Axis.horizontal,
             padding: EdgeInsets.symmetric(horizontal: displayWidth * .02),
             itemBuilder: (context, index) => InkWell(
@@ -75,14 +75,14 @@ class _RootPageState extends State<RootPage> {
                   highlightColor: Colors.transparent,
                   child: Stack(children: [
                     AnimatedContainer(
-                      duration: const Duration(seconds: 1),
+                      duration: const Duration(milliseconds: 400),
                       curve: Curves.fastLinearToSlowEaseIn,
                       width: index == currentPage
-                          ? displayWidth * .39
-                          : displayWidth * .23,
+                          ? displayWidth * .37
+                          : displayWidth * .25,
                       alignment: Alignment.center,
                       child: AnimatedContainer(
-                        duration: const Duration(seconds: 1),
+                        duration: const Duration(milliseconds: 400),
                         curve: Curves.fastLinearToSlowEaseIn,
                         height: index == currentPage ? displayWidth * .12 : 0,
                         width: index == currentPage ? displayWidth * .34 : 0,
@@ -94,7 +94,7 @@ class _RootPageState extends State<RootPage> {
                       ),
                     ),
                     AnimatedContainer(
-                      duration: const Duration(seconds: 1),
+                      duration: const Duration(milliseconds: 400),
                       curve: Curves.fastLinearToSlowEaseIn,
                       width: index == currentPage
                           ? displayWidth * .37
@@ -105,7 +105,7 @@ class _RootPageState extends State<RootPage> {
                           Row(
                             children: [
                               AnimatedContainer(
-                                duration: const Duration(seconds: 1),
+                                duration: const Duration(milliseconds: 400),
                                 curve: Curves.fastLinearToSlowEaseIn,
                                 width: index == currentPage
                                     ? displayWidth * .15
@@ -113,10 +113,10 @@ class _RootPageState extends State<RootPage> {
                               ),
                               AnimatedOpacity(
                                 opacity: index == currentPage ? 1 : 0,
-                                duration: const Duration(seconds: 1),
+                                duration: const Duration(milliseconds: 400),
                                 curve: Curves.fastLinearToSlowEaseIn,
                                 child: Text(index == currentPage
-                                    ? listOfStrings[index]
+                                    ? destinations[index].label
                                     : ''),
                               )
                             ],
@@ -124,11 +124,11 @@ class _RootPageState extends State<RootPage> {
                           Row(
                             children: [
                               AnimatedContainer(
-                                  duration: const Duration(seconds: 1),
+                                  duration: const Duration(milliseconds: 400),
                                   curve: Curves.fastLinearToSlowEaseIn,
                                   width: index == currentPage
                                       ? displayWidth * .05
-                                      : 20),
+                                      : 30),
                               Icon(listOfIcons[index],
                                   size: displayWidth * .076,
                                   color: index == currentPage
@@ -145,6 +145,14 @@ class _RootPageState extends State<RootPage> {
     );
   }
 
-  List<String> listOfStrings = ['Home', 'Camera', 'Bluetooth'];
+  List<NavigationDestination> destinations = [
+    const NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
+    const NavigationDestination(
+        icon: Icon(Icons.photo_camera_outlined), label: 'Camera'),
+    const NavigationDestination(
+        icon: Icon(Icons.bluetooth), label: 'Bluetooth'),
+  ];
+
+  // List<String> listOfStrings = ['Home', 'Camera', 'Bluetooth'];
   List<IconData> listOfIcons = [Icons.home, Icons.camera_alt, Icons.bluetooth];
 }

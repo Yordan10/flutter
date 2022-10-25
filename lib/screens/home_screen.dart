@@ -90,13 +90,12 @@ class _HomePageState extends State<HomePage> {
         slivers: [
           SliverFillRemaining(
               hasScrollBody: true,
-              child: Column( mainAxisSize: MainAxisSize.min,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Flexible(
-                  
                     // flex: 3,
                     fit: FlexFit.loose,
-                
 
                     child: ListView.separated(
                       itemCount: todos.length,
@@ -121,8 +120,6 @@ class _HomePageState extends State<HomePage> {
                               if (direction == DismissDirection.endToStart) {
                                 print("delete");
 
-                                context.read<TodoProvider>().deleteItem(data);
-
                                 ScaffoldMessenger.of(context)
                                   ..removeCurrentSnackBar()
                                   ..showSnackBar(SnackBar(
@@ -138,6 +135,7 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   ));
                               }
+                              context.read<TodoProvider>().deleteItem(data);
                             },
                             child: TodoItem(
                               todo: data,
@@ -166,7 +164,6 @@ class _HomePageState extends State<HomePage> {
                       child: const Text('Learn me'),
                     ),
                   ),
-                   
                 ],
               )),
         ],
