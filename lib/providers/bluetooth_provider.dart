@@ -21,7 +21,7 @@ class BluetoothProvider extends ChangeNotifier {
   bool _bluePlus = false;
   bool _orangeMinus = false;
   bool _orangePlus = false;
-  int _scoreOrange = 0; 
+  int _scoreOrange = 0;
   int _scoreBlue = 0;
 
   final flutterReactiveBle = FlutterReactiveBle();
@@ -103,27 +103,16 @@ class BluetoothProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void disconnect() async {
-    try {
-      await _connection.cancel();
-      _isConnected = false;
-
-      _allDevices = [];
-
-      notifyListeners();
-    } on Exception catch (e, _) {
-      print("Error disconnecting from a device");
-    }
-  }
-
   void connectToDevice(DiscoveredDevice device) {
     _scanStream.cancel();
     _isConnected = true;
 
-    _connection = flutterReactiveBle
-        .connectToDevice(
-            id: device.id, connectionTimeout: const Duration(seconds: 2))
-        .listen((event) async {
+    _connection = flutterReactiveBle.connectToAdvertisingDevice(
+        id: device.id,
+        prescanDuration: Duration(seconds: 2),
+        withServices: [
+          getServiceUuid()
+        ]).listen((event) async {
       switch (event.connectionState) {
         case DeviceConnectionState.connected:
           {
@@ -155,9 +144,25 @@ class BluetoothProvider extends ChangeNotifier {
             break;
           }
         default:
+          {
+            print("Shto ne raboti");
+          }
       }
     });
     notifyListeners();
+  }
+
+  void disconnect() async {
+    try {
+      await _connection.cancel();
+      _isConnected = false;
+
+      _allDevices = [];
+
+      notifyListeners();
+    } on Exception catch (e, _) {
+      print("Error disconnecting from a device");
+    }
   }
 
   void onDataReceived(data) {
