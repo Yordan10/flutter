@@ -116,7 +116,7 @@ class _BluetoothPageState extends State<BluetoothPage> {
                 style: ElevatedButton.styleFrom(
                     primary: Colors.grey, onPrimary: Colors.white),
                 onPressed: (() {
-                  context.read<BluetoothProvider>().startScan();
+                  // context.read<BluetoothProvider>().startScan();
                 }),
                 child: const Icon(Icons.search))
             : ElevatedButton(
