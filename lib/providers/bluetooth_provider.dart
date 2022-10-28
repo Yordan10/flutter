@@ -105,6 +105,7 @@ class BluetoothProvider extends ChangeNotifier {
 
   void connectToDevice(DiscoveredDevice device) {
     _scanStream.cancel();
+    _scanStarted= false;
     _isConnected = true;
 
     _connection = flutterReactiveBle.connectToAdvertisingDevice(
