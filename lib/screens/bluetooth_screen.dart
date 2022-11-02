@@ -1,6 +1,6 @@
 import 'package:flutter_app/providers/bluetooth_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:provider/provider.dart';
 
 class BluetoothPage extends StatefulWidget {
@@ -16,7 +16,7 @@ class _BluetoothPageState extends State<BluetoothPage> {
     final dataProvider = Provider.of<BluetoothProvider>(context);
     bool scanStarted = context.watch<BluetoothProvider>().scanStarted;
 
-    List<DiscoveredDevice> allDevices =
+    List<BluetoothDevice> allDevices =
         context.watch<BluetoothProvider>().allDevices;
     bool isConnected = context.watch<BluetoothProvider>().isConnected;
 
@@ -62,9 +62,12 @@ class _BluetoothPageState extends State<BluetoothPage> {
                                 // onPrimary: Colors.white, // foreground
                               ),
                               onPressed: (() {
-                                dataProvider.disconnect();
+                                context.read<BluetoothProvider>().disconnect();
                               }),
-                              child: const Icon(Icons.cancel,color: Colors.red,)),
+                              child: const Icon(
+                                Icons.cancel,
+                                color: Colors.red,
+                              )),
                         ),
                 ],
               );
@@ -75,7 +78,6 @@ class _BluetoothPageState extends State<BluetoothPage> {
             children: [
               Expanded(
                 child: Column(
-                  
                   children: [
                     dataProvider.bluePlus == true
                         ? const Text(
@@ -111,7 +113,7 @@ class _BluetoothPageState extends State<BluetoothPage> {
         ],
       ),
       persistentFooterButtons: [
-        scanStarted || isConnected
+        isConnected
             ? ElevatedButton(
                 style: ElevatedButton.styleFrom(
                     primary: Colors.grey, onPrimary: Colors.white),

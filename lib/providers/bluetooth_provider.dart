@@ -1,22 +1,24 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:location/location.dart' as loc;
+import 'package:synchronized/synchronized.dart';
 
 class BluetoothProvider extends ChangeNotifier {
   //initializing variables
+  late Timer _timer;
   bool _scanStarted = false;
   bool _isConnected = false;
-  late List<DiscoveredDevice> _allDevices = [];
-  late DiscoveredDevice _connectedDevice;
+  late List<BluetoothDevice> _allDevices = [];
+  late BluetoothDevice? _connectedDevice;
+  StreamSubscription<List<int>>? subscription = null;
+  List<String> listenList = [];
 
-  late StreamSubscription<ConnectionStateUpdate> _connection;
+  late List<BluetoothService> _services;
+  late BluetoothCharacteristic _characteristic;
 
-  late StreamSubscription<DiscoveredDevice> _scanStream;
-
-  late QualifiedCharacteristic _rxCharacteristic;
   bool _blueMinus = false;
   bool _bluePlus = false;
   bool _orangeMinus = false;
@@ -24,17 +26,14 @@ class BluetoothProvider extends ChangeNotifier {
   int _scoreOrange = 0;
   int _scoreBlue = 0;
 
-  final flutterReactiveBle = FlutterReactiveBle();
+  FlutterBluePlus flutterBlue = FlutterBluePlus.instance;
 
 //getters
 
   bool get scanStarted => _scanStarted;
   bool get isConnected => _isConnected;
-  List<DiscoveredDevice> get allDevices => _allDevices;
-  DiscoveredDevice get connectedDevice => _connectedDevice;
-  StreamSubscription<DiscoveredDevice> get scanStream => _scanStream;
+  List<BluetoothDevice> get allDevices => _allDevices;
 
-  QualifiedCharacteristic get rxCharacteristic => _rxCharacteristic;
   bool get blueMinus => _blueMinus;
   bool get bluePlus => _bluePlus;
   bool get orangeMinus => _orangeMinus;
@@ -42,18 +41,21 @@ class BluetoothProvider extends ChangeNotifier {
   int get scoreOrange => _scoreOrange;
   int get scoreBlue => _scoreBlue;
 
-  Uuid getServiceUuid() {
-    if (Platform.isIOS) return Uuid.parse('FFE0');
-    return Uuid.parse('0000ffe0-0000-1000-8000-00805f9b34fb');
+  var lock = new Lock();
+
+  Guid getServiceUuid() {
+    if (Platform.isIOS) return Guid('FFE0');
+    return Guid('0000ffe0-0000-1000-8000-00805f9b34fb');
   }
 
-  Uuid getCharacteristicUuid() {
-    if (Platform.isIOS) return Uuid.parse('FFE1');
-    return Uuid.parse('0000ffe1-0000-1000-8000-00805f9b34fb');
+  Guid getCharacteristicUuid() {
+    if (Platform.isIOS) return Guid('FFE1');
+    return Guid('0000ffe1-0000-1000-8000-00805f9b34fb');
   }
 
   void startScan() async {
     removeAllDevices();
+    flutterBlue.stopScan();
 
     bool permGranted = false;
     _scanStarted = true;
@@ -85,89 +87,135 @@ class BluetoothProvider extends ChangeNotifier {
     debugPrint('$permGranted');
 
     if (permGranted) {
-      _scanStream = flutterReactiveBle
-          .scanForDevices(withServices: [getServiceUuid()]).listen((device) {
-        // if (device.name.startsWith()) {
-        if (_allDevices.every((item) => item.id != device.id)) {
-          print('namerih te $device');
+      flutterBlue.startScan(
+          timeout: Duration(seconds: 4), withServices: [getServiceUuid()]);
 
-          _allDevices.add(device);
-          notifyListeners();
-          // }
+      flutterBlue.scanResults.listen((results) {
+        for (ScanResult r in results) {
+          if (r.device.name.startsWith("SG")) {
+            if (_allDevices.every((item) => item.id != r.device.id)) {
+              print('namerih te ${r.device}');
+
+              _allDevices.add(r.device);
+              notifyListeners();
+            }
+          }
         }
-      }, onError: (err) {
-        print('vlizam v greshkata');
-        debugPrint('$err');
       });
     }
     notifyListeners();
   }
 
-  void connectToDevice(DiscoveredDevice device) {
-    _scanStream.cancel();
-    _scanStarted= false;
-    _isConnected = true;
+  Future<void> connectToDevice(BluetoothDevice device) async {
+    flutterBlue.stopScan();
+    _scanStarted = false;
 
-    _connection = flutterReactiveBle.connectToAdvertisingDevice(
-        id: device.id,
-        prescanDuration: Duration(seconds: 2),
-        withServices: [
-          getServiceUuid()
-        ]).listen((event) async {
-      switch (event.connectionState) {
-        case DeviceConnectionState.connected:
-          {
-            print(event.connectionState);
-            _connectedDevice = device;
+    print("Statusa mi e:  ${device.state}");
 
-            _rxCharacteristic = QualifiedCharacteristic(
-                characteristicId: getCharacteristicUuid(),
-                serviceId: getServiceUuid(),
-                deviceId: event.deviceId);
+    print("Imam id s: ${device.id}");
 
-            keepAlive();
-            flutterReactiveBle
-                .subscribeToCharacteristic(rxCharacteristic)
-                .listen((data) {
-              var sum = data[0] + data[1] + data[2];
-              // Uint8List data = Uint8List.fromList(event);
-              print('Data received:$sum');
-              onDataReceived(data);
-            });
-
-            break;
-          }
-        case DeviceConnectionState.disconnected:
-          {
-            _connection.cancel();
-            _isConnected = false;
-
-            break;
-          }
-        default:
-          {
-            print("Shto ne raboti");
-          }
+    try {
+      await device.connect();
+    } catch (e) {
+      if (e != 'already_connected') {
+        print("Try again sorry");
       }
-    });
+    }
+
+    _services = await device.discoverServices();
+    // flutterBlue.state.listen((event) async {
+    //   if (event != BluetoothState.on) {
+    //     print("Nema bluetooth");
+    //     print(event);
+    //     if (_isConnected) disconnect();
+    //   }
+    // });
+
+    for (int i = 0; i < _services.length; i++) {
+      var service = _services[i];
+
+      if (service.uuid == getServiceUuid()) {
+        for (int i = 0; i < service.characteristics.length; i++) {
+          _characteristic = service.characteristics[i];
+          try {
+            if (_characteristic.uuid == getCharacteristicUuid()) {
+              _connectedDevice = device;
+              _isConnected = true;
+              if (!_characteristic.isNotifying) {
+                await _characteristic.setNotifyValue(true);
+                var temp = _characteristic.isNotifying;
+                print('Stream changed $temp');
+                subscription = _characteristic.value.listen((data) async {
+                  print('Data recveived $data');
+                  // sum = data[0] + data[1] + data[2];
+                  if (data.length > 0) onDataReceived(data);
+                });
+              }
+              notifyListeners();
+              break;
+            }
+          } catch (e) {
+            print(e);
+          }
+        }
+      }
+    }
+
+    keepAlive();
+    // device.state.listen(
+    //   (event) async {
+    //     print(event);
+    //     switch (event) {
+    //       case BluetoothDeviceState.connected:
+    //         {
+    //         
+    //           break;
+    //         }
+    //       case BluetoothDeviceState.disconnected:
+    //         try {
+    //         
+    //         } on Exception catch (e) {
+    //          
+    //         }
+    //         break;
+
+    //       case BluetoothDeviceState.connecting:
+    //         print("Svurzvam se gosho ${event}");
+
+    //         break;
+
+    //       case BluetoothDeviceState.disconnecting:
+    //       
+    //         break;
+    //       default:
+    //         {
+    //           print("Shto ne raboti ${event}");
+    //         }
+    //     }
+    //   },
+    // );
+
     notifyListeners();
   }
 
+
   void disconnect() async {
-    try {
-      await _connection.cancel();
-      _isConnected = false;
+    _timer.cancel();
+    await subscription?.cancel();
+    _isConnected = false;
+    _connectedDevice?.disconnect();
+    _scanStarted = false;
+    _allDevices = [];
+    _services = [];
 
-      _allDevices = [];
+    print(subscription);
 
-      notifyListeners();
-    } on Exception catch (e, _) {
-      print("Error disconnecting from a device");
-    }
+    notifyListeners();
   }
 
   void onDataReceived(data) {
     var sum = data[0] + data[1] + data[2];
+    print('Data received:$sum');
     switch (sum) {
       case 76:
         {
@@ -211,10 +259,10 @@ class BluetoothProvider extends ChangeNotifier {
   }
 
   void keepAlive() {
-    print('$isConnected');
     if (_isConnected == true) {
-      Timer.periodic(const Duration(seconds: 5), (timer) {
-        if (_isConnected) {
+      Timer.periodic(const Duration(seconds: 3), (timer) {
+        _timer = timer;
+        if (_isConnected == true) {
           handleKeepAlive();
         }
       });
@@ -229,7 +277,7 @@ class BluetoothProvider extends ChangeNotifier {
     _orangePlus = false;
   }
 
-  void handleKeepAlive() {
+  void handleKeepAlive() async {
     print('Keep alive activated');
     var data = List<int>.generate(6, (index) => index + 1);
     data[0] = 32;
@@ -238,13 +286,15 @@ class BluetoothProvider extends ChangeNotifier {
     data[3] = 0;
     data[4] = 0;
     data[5] = 47;
-    final characteristic = QualifiedCharacteristic(
-        serviceId: getServiceUuid(),
-        characteristicId: getCharacteristicUuid(),
-        deviceId: _connectedDevice.id);
 
-    flutterReactiveBle.writeCharacteristicWithoutResponse(characteristic,
-        value: data);
+    try {
+      _characteristic.write(data, withoutResponse: true);
+      // await lock.synchronized(() async {
+      //   await
+      // });
+    } catch (e) {
+      print("eroor $e");
+    }
   }
 
   void removeAllDevices() {
