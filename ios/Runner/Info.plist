@@ -57,7 +57,15 @@
 		<string>Used to capture audio</string>
 		<key>NSBluetoothAlwaysUsageDescription</key>
 		<string>The app uses bluetooth to find, connect and transfer data between different devices</string>
-		<key>NSBluetoothPeripheralUsageDescription</key>
+		<key>NSBluetoothPeripheralUsageDescription</key>	
 		<string>The app uses bluetooth to find, connect and transfer data between different devices</string>
+	    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>  
+	    <string>Need Location permission</string>  
+	    <key>NSLocationAlwaysUsageDescription</key>  
+	    <string>Need Location permission</string>  
+	    <key>NSLocationWhenInUseUsageDescription</key>  
+	    <string>Need Location permission</string>
+	
+	
 	</dict>
 </plist>

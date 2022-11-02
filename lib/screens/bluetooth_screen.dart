@@ -14,7 +14,7 @@ class _BluetoothPageState extends State<BluetoothPage> {
   @override
   Widget build(BuildContext context) {
     final dataProvider = Provider.of<BluetoothProvider>(context);
-    bool scanStarted = context.watch<BluetoothProvider>().scanStarted;
+
 
     List<BluetoothDevice> allDevices =
         context.watch<BluetoothProvider>().allDevices;
@@ -118,7 +118,7 @@ class _BluetoothPageState extends State<BluetoothPage> {
                 style: ElevatedButton.styleFrom(
                     primary: Colors.grey, onPrimary: Colors.white),
                 onPressed: (() {
-                  // context.read<BluetoothProvider>().startScan();
+                   context.read<BluetoothProvider>().startScan();
                 }),
                 child: const Icon(Icons.search))
             : ElevatedButton(

@@ -44,12 +44,10 @@ class BluetoothProvider extends ChangeNotifier {
   var lock = new Lock();
 
   Guid getServiceUuid() {
-    if (Platform.isIOS) return Guid('FFE0');
     return Guid('0000ffe0-0000-1000-8000-00805f9b34fb');
   }
 
   Guid getCharacteristicUuid() {
-    if (Platform.isIOS) return Guid('FFE1');
     return Guid('0000ffe1-0000-1000-8000-00805f9b34fb');
   }
 
@@ -84,8 +82,6 @@ class BluetoothProvider extends ChangeNotifier {
     } else if (Platform.isIOS) {
       permGranted = true;
     }
-    debugPrint('$permGranted');
-
     if (permGranted) {
       flutterBlue.startScan(
           timeout: Duration(seconds: 4), withServices: [getServiceUuid()]);
@@ -102,6 +98,8 @@ class BluetoothProvider extends ChangeNotifier {
           }
         }
       });
+    } else {
+      print('no access granted');
     }
     notifyListeners();
   }
@@ -168,14 +166,14 @@ class BluetoothProvider extends ChangeNotifier {
     //     switch (event) {
     //       case BluetoothDeviceState.connected:
     //         {
-    //         
+    //
     //           break;
     //         }
     //       case BluetoothDeviceState.disconnected:
     //         try {
-    //         
+    //
     //         } on Exception catch (e) {
-    //          
+    //
     //         }
     //         break;
 
@@ -185,7 +183,7 @@ class BluetoothProvider extends ChangeNotifier {
     //         break;
 
     //       case BluetoothDeviceState.disconnecting:
-    //       
+    //
     //         break;
     //       default:
     //         {
@@ -197,7 +195,6 @@ class BluetoothProvider extends ChangeNotifier {
 
     notifyListeners();
   }
-
 
   void disconnect() async {
     _timer.cancel();
